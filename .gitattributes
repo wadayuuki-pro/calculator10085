@@ -1,0 +1,11 @@
+# デフォルトの改行コードを自動設定
+* text=auto
+
+# JSONファイルはLFを使用
+*.json text eol=lf
+
+# シェルスクリプトはLFを使用
+*.sh text eol=lf
+
+# Windows用バッチファイルはCRLFを使用
+*.bat text eol=crlf

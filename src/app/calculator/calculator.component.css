@@ -1,0 +1,272 @@
+.calculator {
+    display: flex;
+    flex-direction: column; /* 縦に並べる */
+    max-width: 400px;/* 最大幅 */
+    margin: 100px auto;/* 上下の余白を調整 */
+    padding: 60px ;/* 内側の余白 */
+    border: 2px solid #ccc;/* 枠線のスタイルを追加 */
+    border-radius: 10px;/* 角を少し丸める */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #0e0000ec; 
+    gap: 20px;
+}
+
+.title {
+    font-size: 36px; /* 文字を大きくする */
+    font-weight: bold; /* 太字にする */
+    text-align: center; /* 中央揃え */
+    margin-bottom: 20px; /* 下部に余白を追加 */
+    color: rgba(6, 0, 0, 0.952); /* ダークグレーの文字色（任意） */
+}
+/* 結果のスタイル */
+.formula{
+    margin-bottom: 20px; /* 間隔を確保 */
+    padding: 12px; /* 内側の余白 */
+    font-size: 10px;
+    font-weight: bold;
+    text-align: center;
+    background-color: #e6f7ff; /* 結果エリアの背景色 */
+    border: 1px solid #ccc; /* 枠線のスタイルを追加 */
+    border-radius: 5px; /* 角を少し丸める */
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1); /* 内側のシャドウ効果 */
+    width: 390px; /* 親要素に合わせた幅 */
+    height: 10px;
+}
+
+.result {
+    margin-bottom: 20px; /* 間隔を確保 */
+    padding: 12px; /* 内側の余白 */
+    font-size: 25px;/* フォントサイズ */
+    font-weight: bold;/* 太字にする */
+    text-align: center; /* 中央揃え */
+    background-color: #e6f7ff; /* 結果エリアの背景色 */
+    border: 1px solid #ccc; /* 枠線のスタイルを追加 */
+    border-radius: 5px; /* 角を少し丸める */
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1); /* 内側のシャドウ効果 */
+    width: 390px;
+    height: 30px;
+    overflow: hidden; /* 必要に応じて要素がはみ出ないようにする */
+}
+
+.history {
+     padding: 12px; /* 内側の余白 */
+    font-size: 15px; /* フォントサイズ */
+    font-weight: bold; /* 太字にする */
+    text-align: center; /* 中央揃え */
+    background-color: #e6f7ff; /* 結果エリアの背景色 */
+    border: 1px solid #ccc; /* 枠線のスタイルを追加 */
+    border-radius: 5px; /* 角を少し丸める */
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1); /* 内側のシャドウ効果 */
+    width: 390px; /* 親要素に合わせた幅 */
+    height: 100px; /* 高さを固定 */
+    overflow: hidden; /* 必要に応じて要素がはみ出ないようにする */
+    font-weight: bold;/* 太字にする */
+}
+
+.clear {
+    display: flex; /* 子要素を横並びにする */
+    justify-content: space-between; /* ボタン間を均等に配置 */
+    gap: 20px; /* ボタン同士の間隔を調整 */
+    margin-top: 20px; /* 親要素の上部余白 */
+}
+.clear-button ,.clear-history-button {
+    flex: 0 0 auto;
+}  
+
+.clear-button,
+.clear-history-button {
+    background-color: #dccfcd;
+    border: none; /* 枠線なし */
+    padding: 15px 25px; /* ボタンの内側余白 */
+    border-radius: 5px; /* 角を丸める */
+    width: 200px;
+    height: 50px; /* ボタンの高さ */
+    font-size: 14px; /* フォントサイズ */
+    cursor: pointer; /* ポインターアイコンを表示 */
+    transition: background-color 0.3s ease; /* 背景色の変化を滑らかにする */
+    font-weight: bold;/* 太字にする */
+}
+
+.clear-button:hover,
+.clear-history-button:hover {
+    background-color: #ff3b3b; /* ホバー時の背景色 */
+}
+
+.clear-button:active,
+.clear-history-button:active {
+    background-color: #d73232; /* クリック時の背景色 */
+    transform: scale(0.95); /* 押し込み感を演出 */
+}
+
+.return-button {
+    background-color: #dccfcd;
+    border: none; /* 枠線なし */
+    padding: 15px 25px; /* ボタンの内側余白 */
+    border-radius: 5px; /* 角を丸める */
+    width: 420px;
+    height: 40px; /* ボタンの高さ */
+    font-size: 14px; /* フォントサイズ */
+    cursor: pointer; /* ポインターアイコンを表示 */
+    transition: background-color 0.3s ease; /* 背景色の変化を滑らかにする */
+    font-weight: bold;/* 太字にする */
+}
+
+.return-button:hover {
+    background-color: hsl(229, 50%, 60%); /* ホバー時の背景色 */
+}
+
+.return-button:active {
+    background-color: #5214e3; /* クリック時の背景色 */
+    transform: scale(0.95); /* 押し込み感を演出 */
+}
+/* ボタンのスタイル */      
+.button-grid {
+    display: grid; /* グリッドレイアウトを適用 */
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px; 
+    margin-bottom: 20px;/* ボタン間のスペース */
+}
+
+.number-button {
+    display: flex; /* フレックスボックスでテキストを中央に配置 */
+    justify-content: center; /* 横方向に中央揃え */
+    align-items: center; /* 縦方向に中央揃え */
+    width: 100px; /* ボタンの幅 */
+    height: 100px; /* ボタンの高さ */
+    border-radius: 50%; /* 完全な丸形にする */
+    background-color: #ccc; /* 数字ボタンの背景色 */
+    font-size: 25px; /* フォントサイズ */
+    cursor: pointer; /* ポインター表示 */
+    transition: background-color 0.3s ease; /* 背景色の変化を滑らかにする */
+    border: 2px solid #ff6e6100; /* 枠線の色 */
+}
+
+.number-button:hover {
+    background-color: #61d7ff; /* ホバー時の背景色 */
+}
+
+.number-button:active  {
+    background-color: #3b48ff; /* クリック時の背景色 */
+    transform: scale(0.95); /* 押し込む効果 */
+}
+
+.zero-container {
+    display: flex; /* フレックスボックスでテキストを中央に配置 */
+    justify-content: flex-end; /* 横方向に中央揃え */
+    align-items: center; 
+    gap: 20px;/* 縦方向に中央揃え */
+}
+/* 数字ボタンのスタイル */
+.button-button {display: flex; /* フレックスボックスでテキストを中央に配置 */
+    justify-content: center; /* 横方向に中央揃え */
+    align-items: center; /* 縦方向に中央揃え */
+    width: 100px; /* ボタンの幅 */
+    height: 100px; /* ボタンの高さ */
+    border-radius: 50%; /* 完全な丸形にする */
+    background-color: #ccc; /* 数字ボタンの背景色 */
+    font-size: 25px; /* フォントサイズ */
+    cursor: pointer; /* ポインター表示 */
+    transition: background-color 0.3s ease; 
+    border: 2px solid #ff6e6100; /* 枠線の色 */
+}
+
+.button-button:hover {
+    background-color: #61d7ff;
+}
+
+.button-button:active {
+    background-color: #3b48ff;
+    transform: scale(0.95); /* 押し込む効果 */
+}
+
+.zero-button {width: 200px; /* ボタンの幅 */
+    height: 100px; /* ボタンの高さ */
+    border-radius: 80px; /* 丸形にする */
+    background-color: #ccc; /* 数字ボタンの背景色 */
+    border: none; /* 枠線なし */
+    font-size: 25px; /* フォントサイズ */
+    cursor: pointer; /* ポインター表示 */
+    align-self: flex-end; /* ボタンのみ右端に配置 */
+    margin: 10px 0; /* 上下間隔を調整 */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.zero-button:hover {
+    background-color: #61d7ff;
+}
+
+.zero-button:active {
+    background-color: #3b48ff;
+    transform: scale(0.95); /* 押し込む効果 */
+}
+
+.operations {
+    display: flex; /* フレックスボックスを使用して配置 */
+    justify-content: space-around; /* ボタンを均等に配置 */
+    margin-top: 10px; /* 上下の余白を調整 */
+    gap: 12px; 
+    flex-direction: column;
+}
+
+.operation-button {
+    width: 80px; /* ボタンの幅 */
+    height: 65px; /* ボタンの高さ */
+    background-color: #ffcccb; /* 背景色（任意） */
+    border: 2px solid #11111300; /* 枠線の色 */
+    font-size: 30px; /* 小さいフォントサイズ */
+    padding: 8px 12px; /* 小さめの内側余白 */
+    cursor: pointer; /* ポインター表示 */
+    transition: background-color 0.3s ease;
+}
+
+.operation-button:hover {
+    background-color: #ff6f61; /* ホバー時の背景色 */
+}
+
+.operation-button:active {
+    background-color: #ff3b3b; /* クリック時の背景色 */
+    transform: scale(0.95); /* 押し込む効果 */
+}
+
+.button-grid,.operations {
+    flex: 1;
+max-width: 50%;
+}
+
+.button-grid-operations-container {
+    display: flex; /* 横並びにする */
+    justify-content: space-between; /* 均等にスペースを配置 */
+    gap: 20px; /* ボタン群の間隔を調整 */
+    align-items: flex-start; /* 上寄せに調整（必要に応じて変更可） */
+  }
+  
+  .button-grid {
+    flex: 1; /* 必要に応じてスペースを調整 */
+  }
+  
+  .operations {
+    flex: 0.5; /* 必要に応じてサイズ調整 */
+  }
+
+  .button-grid-zero-operations-container {
+    display: flex; /* 横並びにする */
+    justify-content: space-between; /* 均等にスペースを配置 */
+    gap: 20px; /* ボタン群の間隔を調整 */
+    align-items: flex-start; /* 上寄せに調整（必要に応じて変更可） */
+  }
+  
+  .button-grid-zero {
+    flex: 1; /* 必要に応じてスペースを調整 */
+  }
+  
+  .operations {
+    flex: 0.5; /* 必要に応じてサイズ調整 */
+  }
+  
+
+
+
+
+
+
+

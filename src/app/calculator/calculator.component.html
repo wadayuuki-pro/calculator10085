@@ -1,0 +1,55 @@
+<p class="title">電卓アプリ</p>
+
+<div class="calculator">
+   
+
+    <div class="formula-result">
+    <div class="formula">{{ currentFormula || '現在の計算式'}}</div>
+    <div class="result">{{ displayValue || '結果' }}</div>
+    </div>
+
+    <div class="history">
+        <ul>    
+          <li *ngFor="let item of history">{{ item }}</li>
+        </ul>
+      </div>
+      
+
+    <div class="clear">
+        <button class="clear-button"(click)="clear()">Clear</button>
+        <button class="clear-history-button"(click)="clearHistory()">履歴をclear</button>
+    </div>
+
+    <button  class="return-button"(click)="returnToPreviousState()">リターン</button>
+
+  
+    <div class="button-grid-zero-operations-container">
+        <div class="button-grid-zero-container">
+ 
+    <div class="button-grid">
+    <button class="number-button"(click)="inputNumber('1')">1</button>
+    <button class="number-button"(click)="inputNumber('2')">2</button>
+    <button class="number-button"(click)="inputNumber('3')">3</button>
+    <button class="number-button"(click)="inputNumber('4')">4</button>
+    <button class="number-button"(click)="inputNumber('5')">5</button>
+    <button class="number-button"(click)="inputNumber('6')">6</button>
+    <button class="number-button"(click)="inputNumber('7')">7</button>
+    <button class="number-button"(click)="inputNumber('8')">8</button>
+    <button class="number-button"(click)="inputNumber('9')">9</button>
+    </div>
+    <div class="zero-container">
+    <button class="zero-button"(click)="inputNumber('0')">0</button>
+    <button class="button-button"(click)="inputDecimal()">.</button>
+    </div>
+    </div>
+    
+   <div class="operations">
+    <button class="operation-button"(click)="setOperation('+')">＋</button>
+    <button class="operation-button"(click)="setOperation('-')">−</button>
+    <button class="operation-button"(click)="setOperation('*')">×</button>
+    <button class="operation-button"(click)="setOperation('/')">÷</button>
+    <button class="operation-button"(click)="setDiscount()">%</button>
+    <button class="operation-button"(click)="calculate()">＝</button>
+   </div>
+  </div>
+  </div>
