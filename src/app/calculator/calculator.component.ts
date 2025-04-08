@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';//最新状態
+import { Component } from '@angular/core';//saisinnjyoutai
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Decimal } from 'decimal.js'
@@ -14,7 +14,7 @@ export class CalculatorComponent {
   previousValue: Decimal | null = null; // 前回の値
   operation: string | null = null; // 演算子
   displayValue: string = '0'; // 表示する値
-  history: string[] = ['「計算履歴」最大、過去2件まで表示',`割引計算は「数値-割引数%」の順に入力`,'10億桁以上は表示できません']; // 履歴
+  history: string[] = ['「計算履歴」過去2件まで表示',`割引計算は「数値-割引数%」の順`]; // 履歴
   currentFormula: string = ''; // 現在の計算式
   isReturnActive: boolean = false; // リターン操作を示す
   returnFormula: string = ''; // リターン操作の式
@@ -28,26 +28,93 @@ export class CalculatorComponent {
   discountRate:number | null = null;
 
   inputNumber(value: string): void {
-    // 初回の「-」入力は負の数として扱う
+
+     // エラー状態の場合はリセットして新しい入力を受け付ける
+     if (this.currentFormula.includes('E:')) {
+      this.clear(); // 状態をリセット
+  }
+
+    if (this.currentFormula.replace(/\s+/g, '').length >= 22) {
+      this.currentFormula = 'E:これ以上は入力不可'; // エラーメッセージを表示
+      return; // 処理を終了
+  }
+
+    // 10桁以上の入力は無視（負号を除く桁数をカウント）
+    if (this.currentValue.replace(/^-/, '').length >= 10) {
+        return; // 入力を無視
+    }
+
+    // 初回入力が「-」の場合（負号）
     if (this.currentValue === '' && value === '-') {
         this.currentValue = '-';
         this.currentFormula = '-';
-    } else {
+        return;
+    }
+
+    // 負号の後に「0」を入力（負のゼロの状態を保持）
+    if (this.currentValue === '-' && value === '0') {
+        this.currentValue = '-0';
+        this.currentFormula = '-0';
+        return;
+    }
+
+    // 「-0」の後に小数点を入力する場合
+    if (this.currentValue === '-0' && value === '.') {
+        this.currentValue = '-0.';
+        this.currentFormula = '-0.';
+        return;
+    }
+
+    // 「-0.x」の後に数字を入力する場合
+    if (this.currentValue.startsWith('-0') && this.currentValue.includes('.') && value.match(/\d/)) {
         this.currentValue += value;
         this.currentFormula += value;
+        return;
     }
 
-    // 現在の値が100億桁以上になっていないかをチェック
-    const numericValue = this.currentValue.replace('-', ''); // 負号を除いて桁数を確認
-    if (numericValue.length > 10) { // 最大10桁まで許容
-        this.currentValue = this.currentValue.slice(0, -1); // 最後の入力を取り消す
-        this.currentFormula = this.currentFormula.slice(0, -1); // 式の最後の入力も取り消す
-        return; // 処理を中断
+
+    // 0の後に数字を入力する場合
+    if(this.currentValue === '0' && value !== '0'){
+      this.currentValue = value;
+      this.currentFormula = value;
+      return;
     }
 
-    // 数値として無効な値が入らないようチェック
+    // 演算子直後に数字を入力する場合の処理
+    if (this.operation !== null && this.currentValue === '') {
+        this.currentValue = value; // 演算子後に新しい数値を設定
+        this.currentFormula += value;
+        this.displayValue = this.currentValue;
+        return;
+    }
+
+    // 通常の負の数入力（「-」で始まり数字が続く場合）
+    if (this.currentValue.startsWith('-') && value.match(/\d/)) {
+        this.currentValue += value;
+        this.currentFormula += value;
+        return;
+    }
+
+    // 初回入力が「0」の場合
+    if (this.currentValue === '' && value === '0') {
+        this.currentValue = '0';
+        this.currentFormula = '0';
+        return;
+    }
+
+    // 「0」の連続入力を防ぐ（ただし「0.」は許可）
+    if (this.currentValue === '0' && value === '0' && !this.currentValue.includes('.')) {
+        return; // 処理を無視
+    }
+
+    // 通常の入力処理
+    this.currentValue += value;
+    this.currentFormula += value;
+
+    // 数値として無効な状態を検出（負号、小数点を考慮）
     if (!this.isValidNumber(this.currentValue)) {
-        throw new Error('無効な数値が入力されています');
+        this.currentFormula = 'E:無効な数値が入力されています';
+        return;
     }
 
     this.displayValue = this.currentValue;
@@ -60,6 +127,11 @@ private isValidNumber(value: string): boolean {
 
   // 小数点ボタンが押されたら
 inputDecimal(): void {
+  if (this.operation !== null && this.currentValue === '') {
+    this.displayValue = 'E:演算子の後に小数点は入力不可'; // メッセージを表示
+    return; // 処理を終了
+}
+
     if (!this.currentValue.includes('.')) {
         this.currentValue += this.currentValue === '' ? '0.' : '.';
         this.currentFormula = `${this.currentFormula}.`; // 小数点を反映
@@ -69,10 +141,27 @@ inputDecimal(): void {
 }
 
 setOperation(op: string): void {
+
+  // エラー状態の場合はリセットして新しい演算子を受け付ける
+  if (this.currentFormula.includes('E:')) {
+    this.clear(); // 状態をリセット
+}
+
+  // 小数点が入力されている場合は演算子を無効化
+  if (this.currentValue.endsWith('.')) {
+      return;
+  }
+  let displayOp = op; // 初期値はそのままの演算子
+  if (op === '*') {
+      displayOp = '×'; // 表示用は「×」
+  } else if (op === '/') {
+      displayOp = '÷'; // 表示用は「÷」
+  }
+
   if (this.previousValue === null && this.currentValue === '') {
       // 初回の操作で「-」以外の演算子が押された場合にエラー
       if (op !== '-') {
-          this.displayValue = '数値を入力してください';
+          this.currentFormula = 'E:数値を入力してください';
           return;
       }
   }
@@ -84,19 +173,17 @@ setOperation(op: string): void {
 
   // 連続で演算子が押された場合に前の演算子を置き換える
   if (this.operation !== null && this.currentValue === '') {
-      // 直前の演算子を削除し、新しい演算子で置き換える
       this.currentFormula = this.currentFormula.slice(0, -3); // 演算子と空白を削除
-      this.currentFormula += ` ${op} `;
+      this.currentFormula += ` ${displayOp} `;
   } else {
       // 通常の処理
-      this.currentFormula += ` ${op} `;
+      this.currentFormula += ` ${displayOp} `;
   }
 
   this.operation = op; // 新しい演算子を設定
   this.currentValue = ''; // 現在の値をリセット
   this.saveState();
 }
-
 
 calculate(): void {
   this.currentFormula = this.preprocessFormula(this.currentFormula);
@@ -107,37 +194,51 @@ calculate(): void {
 
           // トークン数チェック
           if (tokens.length < 3) {
-              throw new Error('不完全な式です');
+              this.currentFormula = 'E:不完全な式です';
+              return;
           }
+
           // 優先順位を考慮して計算
           const intermediateResult = this.processOperators(tokens, ['*', '/']);
           const finalResult = this.processOperators(intermediateResult, ['+', '-']);
 
           const result = new Decimal(finalResult[0]);
 
-          // **桁数チェック**: 数値が大きすぎる場合にエラーを表示
+          // **計算結果の桁数チェック**
           const resultString = result.toFixed(); // 結果を文字列として取得
-          if (resultString.length > 10) { // 10桁以上かチェック
-              this.displayValue = 'エラー: 数字が大きすぎます';
-              this.history.push('エラー: 数字が大きすぎます');
+          if (resultString.length > 10) {
+              if (this.history.length >= 2) {
+                  this.history.shift(); // 古い履歴を削除
+              }
+              this.currentFormula = 'E:結果が大きすぎます';
+              this.history.push('E:結果が大きすぎます');
+              this.previousValue = null;
+              this.currentValue = '';
               return;
           }
+
           // 結果を表示
           this.displayValue = result.mod(1).isZero() ? result.toFixed(0) : result.toFixed(8);
 
-          // 履歴を更新
-          this.history.push(`${this.currentFormula} = ${this.displayValue}`);
-          if (this.history.length > 2) {
-              this.history.shift(); // 古い履歴を削除
+          // 履歴の演算子を表示用に変換して更新
+          const displayFormula = this.currentFormula
+              .replace(/\*/g, '×') // * を × に変換
+              .replace(/\//g, '÷'); // / を ÷ に変換
+
+          if (this.history.length >= 2) {
+              this.history.shift(); // 先に古い履歴を削除
           }
+          this.history.push(`${displayFormula} = ${this.displayValue}`); // 新しい履歴を追加
 
           // 初期値に更新
-          this.previousValue = result; 
-          this.currentFormula = this.displayValue; 
-          this.currentValue = ''; 
+          this.previousValue = result;
+          this.currentFormula = this.displayValue;
+          this.currentValue = '';
           this.operation = null;
       } catch (error) {
-          this.displayValue = error instanceof Error ? `エラー: ${error.message}` : '不明なエラーが発生しました';
+          const errorMessage = error instanceof Error ? `E: ${error.message}` : 'E:不明なエラーが発生しました';
+          this.displayValue = errorMessage;
+          this.currentFormula = errorMessage; // currentFormula にもエラーを反映
       }
   }
 }
@@ -145,7 +246,7 @@ calculate(): void {
 setDiscount(): void {
   // 必要な条件を確認
   if (this.previousValue === null || this.currentValue === '') {
-      this.displayValue = ' 割引値が不足しています';
+      this.displayValue = 'E:割引値が不足しています';
       return;
   }
 
@@ -154,7 +255,7 @@ setDiscount(): void {
 
   // 割引率の範囲チェック
   if (discountRate.gte(100) || discountRate.lt(0)) {
-      this.displayValue = 'エラー: 割引率は0～100の間で指定してください';
+      this.displayValue = 'E:割引率は0～100の間で指定してください';
       return;
   }
   // 割引値を計算
@@ -181,7 +282,7 @@ setDiscount(): void {
 private tokenize(formula: string): string[] {
   const tokens = formula.match(/(?<!\d)-?\d+(\.\d+)?|[+\-*/]/g);
   if (!tokens || tokens.length === 0) {
-      throw new Error('式が無効です');
+      throw new Error('E:式が無効です');
   }
   return tokens;
 }
@@ -203,7 +304,7 @@ private processOperators(tokens: string[], operators: string[]): string[] {
               result = left.times(right);
           } else if (token === '/') {
               if (right.isZero()) {
-                  throw new Error('ゼロ除算エラー');
+                  throw new Error('E:ゼロ除算エラー');
               }
               result = left.div(right);
           } else if (token === '+') {
@@ -276,7 +377,7 @@ private saveState(): void {
   }
 
   private preprocessFormula(formula: string): string {
-    return formula.replace(/\s+/g, '').replace(/(\d+)\.(\d+)/g, '$1.$2'); // 必要なら空白や形式を調整
+    return formula.replace(/\s+/g, '').replace(/(\d+)\.(\d+)/g, '$1.$2').replace(/\s+/g,'').replace(/×/g,'*').replace(/÷/g,'/'); // 必要なら空白や形式を調整
 }
 
 

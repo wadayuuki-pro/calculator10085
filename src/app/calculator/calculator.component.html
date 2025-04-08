@@ -1,11 +1,8 @@
-<p class="title">電卓アプリ</p>
-
 <div class="calculator">
    
 
     <div class="formula-result">
     <div class="formula">{{ currentFormula || '現在の計算式'}}</div>
-    <div class="result">{{ displayValue || '結果' }}</div>
     </div>
 
     <div class="history">
@@ -16,8 +13,8 @@
       
 
     <div class="clear">
-        <button class="clear-button"(click)="clear()">Clear</button>
-        <button class="clear-history-button"(click)="clearHistory()">履歴をclear</button>
+        <button class="clear-button"(click)="clear()">C</button>
+        <button class="clear-history-button"(click)="clearHistory()">履歴C</button>
     </div>
 
     <button  class="return-button"(click)="returnToPreviousState()">リターン</button>
