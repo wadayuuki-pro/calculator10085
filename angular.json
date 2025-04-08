@@ -90,7 +90,7 @@
               }
             ],
             "styles": [
-              "src/styles.css"
+              "src/style.css"
             ],
             "scripts": []
           }
