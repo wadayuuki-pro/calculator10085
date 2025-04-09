@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';//最新バージョン
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Decimal } from 'decimal.js'
@@ -39,8 +39,8 @@ export class CalculatorComponent {
       this.clear(); // 状態をリセット
   }
 
-    if (this.currentFormula.replace(/\s+/g, '').length >= 22) {
-      this.currentFormula = 'E:これ以上は入力不可'; // エラーメッセージを表示
+    if (this.currentFormula.replace(/\s+/g, '').length >= 25) {
+      this.currentFormula = 'E:式が長すぎます'; // エラーメッセージを表示
       return; // 処理を終了
   }
 
@@ -224,11 +224,8 @@ calculate(): void {
           console.log(result);
 
 
-          this.displayValue = result.abs().lessThan(new Decimal('0.00000001')) && result.greaterThan(new Decimal(0))
-          ? '0.00000000' // 非常に小さい正の値の場合は「0.00000000」と表示
-          : (result.equals(new Decimal(0))
-              ? '0' // 計算結果がちょうど0の場合は「0」と表示
-              : (result.mod(1).isZero() && result.abs().greaterThanOrEqualTo(new Decimal(1))
+          this.displayValue = (result.equals(new Decimal(0))
+              ? '0' : (result.mod(1).isZero() && result.abs().greaterThanOrEqualTo(new Decimal(1))
                   ? result.toFixed(0) // 割り切れる整数の場合は小数点なし
                   : (result.times(new Decimal(10 ** 8)).mod(1).isZero()
                       ? result.toFixed(8).replace(/\.?0+$/, '') // 割り切れる小数の場合は余分なゼロを削除
@@ -236,8 +233,7 @@ calculate(): void {
 
 
           // **計算結果の桁数チェック**
-          const resultString = this.displayValue.toString(); // 結果を文字列として取得
-          console.log(resultString);
+          const resultString = this.displayValue.toString().replace(/^-/, '').replace(/\./g, '');
           if (resultString.length > 10) {
               if (this.history.length >= 2) {
                   this.history.shift(); // 古い履歴を削除
@@ -259,7 +255,7 @@ calculate(): void {
           }
           this.history.push(`${displayFormula} = ${this.displayValue}`); // 新しい履歴を追加
 
-          if (this.history.length > 22) {
+          if (this.history.length > 25) {
             this.currentFormula = 'E:式が長すぎます';
             this.history.push('E:式が長すぎます');
             this.previousValue = null;
@@ -281,46 +277,54 @@ calculate(): void {
 }
 
 setDiscount(): void {
-  // 必要な条件を確認
-  if (this.previousValue === null || this.currentValue === '') {
-      this.currentFormula = 'E:割引値が不足';
+    // 必要な条件を確認
+    if (this.previousValue === null || this.currentValue === '') {
+        this.currentFormula = 'E:割引値が不足';
+        return;
+    }
+  
+    if (!this.currentFormula.includes('-')) {
+      this.currentFormula = 'E:「数値-割引数%」の順で入力';
       return;
+    }
+  
+    const baseValue = this.previousValue; // 元の値
+    const discountRate = new Decimal(this.currentValue); // 割引率
+  
+    // 割引率の範囲チェック
+    if (discountRate.gte(100) || discountRate.lt(0)) {
+        this.currentFormula = 'E:割引率は0～100の間';
+        return;
+    }
+  
+    // 割引率を適用
+    const percentageDiscount = discountRate.div(100); // 9% → 0.09 に変換
+    const discountAmount = baseValue.times(percentageDiscount); // 割引額
+    const resultValue = baseValue.minus(discountAmount); // 割引後の金額
+  
+    // 結果を表示
+    this.displayValue = resultValue.mod(1).isZero()
+  ? resultValue.toFixed(0)  // 整数なら小数なし
+  : parseFloat(resultValue.toFixed(8)).toString(); // 小数点以下のゼロを不要にする
+    this.currentFormula = this.displayValue;
+  
+    // 履歴を更新（修正した計算式を反映）
+    this.history.push(`${parseFloat(baseValue.toFixed(8)).toString()} - ${
+        parseFloat(discountRate.toFixed(8)).toString()
+      }% = ${this.displayValue}`);
+  
+    if (this.history.length > 2) {
+        this.history.shift(); // 古い履歴を削除
+    }
+  
+    // 状態を更新
+    this.previousValue = resultValue;
+    this.currentValue = ''; // 割引率をリセット
+    this.operation = null;
+  
+    this.saveState(); // 状態を保存
   }
-
-  if (!this.currentFormula.includes('-')) {
-    this.currentFormula = 'E:「数値-割引数%」の順で入力';
-    return;
-  }
-
-  const baseValue = this.previousValue; // 元の値
-  const discountRate = new Decimal(this.currentValue); // 割引率
-
-  // 割引率の範囲チェック
-  if (discountRate.gte(100) || discountRate.lt(0)) {
-      this.currentFormula = 'E:割引率は0～100の間';
-      return;
-  }
-  // 割引値を計算
-  const discountAmount = baseValue.times(discountRate).div(100); // 割引額
-  const result = baseValue.minus(discountAmount); // 割引後の金額
-
-  // 結果を表示
-  this.displayValue = result.mod(1).isZero()? result.toFixed(0): result.toFixed(8);
-  this.currentFormula = this.displayValue;
-
-  // 履歴を更新
-  this.history.push(`${baseValue.toFixed(0)} - ${discountRate.toFixed(2)}% = ${this.displayValue}`);
-  if (this.history.length > 2) {
-      this.history.shift(); // 古い履歴を削除
-  }
-
-  // 状態を更新
-  this.previousValue = result;
-  this.currentValue = ''; // 割引率をリセット
-  this.operation = null;
-
-  this.saveState(); // 状態を保存
-}
+  
 
 private tokenize(formula: string): string[] {
   const tokens = formula.match(/(?<!\d)-?\d+(\.\d+)?|[+\-*/]/g);
@@ -347,7 +351,7 @@ private processOperators(tokens: string[], operators: string[]): string[] {
               result = left.times(right);
           } else if (token === '/') {
               if (right.isZero()) {
-                  throw new Error('E:ゼロ除算エラー');
+                  throw new Error('ゼロ除算エラー');
               }
               result = left.div(right);
           } else if (token === '+') {
