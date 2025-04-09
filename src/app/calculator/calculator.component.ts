@@ -44,10 +44,10 @@ export class CalculatorComponent {
       return; // 処理を終了
   }
 
-    // 10桁以上の入力は無視（負号を除く桁数をカウント）
-    if (this.currentValue.replace(/^-/, '').length >= 10) {
+    // 10桁以上の入力は無視（負号と小数点を除く桁数をカウント）
+    if (this.currentValue.replace(/^-/, '').replace(/\./g, '').length >= 10) {
         return; // 入力を無視
-    }
+    }    
 
     // 初回入力が「-」の場合（負号）
     if (this.currentValue === '' && value === '-') {
@@ -142,12 +142,12 @@ inputDecimal(): void {
     if(this.isResultDisplay){
         return;
     }
-
+//演算子の後に小数点は入力不可
   if (this.operation !== null && this.currentValue === '') {
     this.displayValue = 'E:演算子の後に小数点は入力不可'; // メッセージを表示
     return; // 処理を終了
 }
-
+//小数点が入力されていない場合は小数点を入力
     if (!this.currentValue.includes('.')) {
         this.currentValue += this.currentValue === '' ? '0.' : '.';
         this.currentFormula = `${this.currentFormula}.`; // 小数点を反映
@@ -156,10 +156,11 @@ inputDecimal(): void {
     this.saveState();
 }
 
+//演算子が押されたら
 setOperation(op: string): void {
   // エラー状態の場合はリセットして新しい演算子を受け付ける
   this.isResultDisplay = false;
-
+//エラー状態の場合はリセット
   if (this.currentFormula.includes('E:')) {
     this.clear(); // 状態をリセット
 }
@@ -271,7 +272,7 @@ calculate(): void {
       } catch (error) {
           const errorMessage = error instanceof Error ? `E: ${error.message}` : 'E:不明なエラーが発生';
           this.displayValue = errorMessage;
-          this.currentFormula = errorMessage; // currentFormula にもエラーを反映
+          this.currentFormula = errorMessage; 
       }
   }
 }
@@ -379,7 +380,6 @@ returnToPreviousState(): void {
         const currentState = this.stateStack.pop(); // 現在の状態を削除
         const previousState = this.stateStack[this.stateStack.length - 1]; // 1つ前の状態
 
-        // **期待される復元条件を明確に設定**
         if (previousState) {
             // 前の状態を正確に復元
             this.currentValue = previousState.currentValue;
@@ -416,14 +416,6 @@ private saveState(): void {
 }
   updateFormula(value: string): void {
     this.currentFormula += value;
-  }
-
-  get formulaPlaceholder(): string {
-    return this.currentFormula === '' ? '式' : this.currentFormula;
-  }
-
-  get resultPlaceholder(): string {
-    return this.displayValue === '' ? '結果' : this.displayValue;
   }
 
   clear(): void {

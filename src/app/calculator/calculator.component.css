@@ -51,9 +51,6 @@
     align-items: flex-start; /* 上寄せ */
 }
 
-
-
-
 .clear {
     display: flex; /* 子要素を横並びにする */
     justify-content: space-between; /* ボタン間を均等に配置 */
