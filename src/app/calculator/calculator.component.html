@@ -17,7 +17,7 @@
         <button class="clear-history-button"(click)="clearHistory()">履歴C</button>
     </div>
 
-    <button  class="return-button"(click)="returnToPreviousState()">リターン</button>
+    <button  class="return-button"(click)="returnToPreviousState()">R:一つ前に戻る</button>
 
   
     <div class="button-grid-zero-operations-container">
@@ -37,6 +37,7 @@
     <div class="zero-container">
     <button class="zero-button"(click)="inputNumber('0')">0</button>
     <button class="button-button"(click)="inputDecimal()">.</button>
+    <button class="operation-button2"(click)="setDiscount()">%</button>
     </div>
     </div>
     
@@ -45,7 +46,7 @@
     <button class="operation-button"(click)="setOperation('-')">−</button>
     <button class="operation-button"(click)="setOperation('*')">×</button>
     <button class="operation-button"(click)="setOperation('/')">÷</button>
-    <button class="operation-button"(click)="setDiscount()">%</button>
+    
     <button class="operation-button"(click)="calculate()">＝</button>
    </div>
   </div>
