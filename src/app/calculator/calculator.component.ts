@@ -26,8 +26,14 @@ export class CalculatorComponent {
     currentFormula: string;
   }> = []; // 状態を保存する
   discountRate:number | null = null;
+  isResultDisplay: boolean = false;
 
   inputNumber(value: string): void {
+
+    if(this.isResultDisplay && value.match(/\d/)){
+        return;
+    }
+
      // エラー状態の場合はリセットして新しい入力を受け付ける
      if (this.currentFormula.includes('E:')) {
       this.clear(); // 状態をリセット
@@ -74,7 +80,6 @@ export class CalculatorComponent {
         this.saveState();
         return;
     }
-
 
     // 0の後に数字を入力する場合
     if(this.currentValue === '0' && value !== '0'){
@@ -134,6 +139,10 @@ private isValidNumber(value: string): boolean {
 
   // 小数点ボタンが押されたら
 inputDecimal(): void {
+    if(this.isResultDisplay){
+        return;
+    }
+
   if (this.operation !== null && this.currentValue === '') {
     this.displayValue = 'E:演算子の後に小数点は入力不可'; // メッセージを表示
     return; // 処理を終了
@@ -149,6 +158,8 @@ inputDecimal(): void {
 
 setOperation(op: string): void {
   // エラー状態の場合はリセットして新しい演算子を受け付ける
+  this.isResultDisplay = false;
+
   if (this.currentFormula.includes('E:')) {
     this.clear(); // 状態をリセット
 }
@@ -260,6 +271,7 @@ calculate(): void {
           this.currentFormula = this.displayValue;
           this.currentValue = '';
           this.operation = null;
+          this.isResultDisplay = true;
       } catch (error) {
           const errorMessage = error instanceof Error ? `E: ${error.message}` : 'E:不明なエラーが発生';
           this.displayValue = errorMessage;
@@ -356,6 +368,8 @@ private processOperators(tokens: string[], operators: string[]): string[] {
 }
 
 returnToPreviousState(): void {
+  this.isResultDisplay = false;
+
     if (this.stateStack.length > 1) {
         // 現在の状態を削除せず、スタック全体を確認
         const currentState = this.stateStack.pop(); // 現在の状態を削除
@@ -415,6 +429,7 @@ private saveState(): void {
     this.displayValue = '0';
     this.currentFormula = '';
     this.saveState();
+    this.isResultDisplay = false;
   }
 
   clearHistory(): void {
